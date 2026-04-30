@@ -10,13 +10,24 @@ let chatHistory = [];
 async function getResponse(prompt) {
     chatHistory.push({ role: "user", parts: [{ text: prompt }] });
 
-    const requestBody = {
-        // v1beta mein system_instruction ka format ye hona chahiye
-        system_instruction: {
-            parts: [{ text: "You are a professional obesity consultant. Answer in Roman Urdu or English about weight loss only." }]
-        },
-        contents: chatHistory
-    };
+   const requestBody = {
+    contents: chatHistory,
+    systemInstruction: {
+        parts: [{ text: `
+            Role & Strict Policy:
+            1. You are a Professional Obesity & Weight Loss Specialist.
+            2. Only answer questions related to obesity, fat loss, diet, exercise, and metabolic health.
+            3. LANGUAGE RULE: 
+               - If the user asks in Roman Urdu, respond in Roman Urdu.
+               - If the user asks in English, respond in English.
+            4. OFF-TOPIC RULE:
+               - If the user asks anything NOT related to obesity/health:
+                 - In Roman Urdu say: "Main sirf motapay (obesity) aur weight loss ke bare mein guide kar sakta hoon. Aap mujhse diet plan, exercises, ya fat kam karne ke tariqon ke bare mein pooch sakte hain."
+                 - In English say: "I can only provide guidance regarding obesity and weight loss. You can ask me about diet plans, exercises, or ways to reduce body fat."
+            5. Maintain a professional and clinical tone for doctors, and a simple helpful tone for general users.`
+        }]
+    }
+};
 
     try {
         const response = await fetch(API_URL, {
@@ -32,14 +43,15 @@ async function getResponse(prompt) {
             chatHistory.push({ role: "model", parts: [{ text: aiText }] });
             return aiText;
         } else {
-            console.error("API Error Detail:", data);
-            return "Server error: " + (data.error ? data.error.message : "Unknown error");
+            console.error("API Detail:", data);
+            return "Maafi chahta hoon, abhi main jawab nahi de sakta. Dobara koshish karein.";
         }
     } catch (error) {
-        return "Network connection issue.";
+        return "Connection ka masla hai. Internet check karein.";
     }
 }
 
+// Append message function
 function appendMessage(text, sender) {
     const msgDiv = document.createElement('div');
     msgDiv.classList.add('message', sender === 'user' ? 'user-message' : 'ai-message');
@@ -48,8 +60,9 @@ function appendMessage(text, sender) {
     chatBox.scrollTop = chatBox.scrollHeight;
 }
 
+// Event Listener
 sendBtn.addEventListener('click', async () => {
-    const text = userInput.value;
+    const text = userInput.value.trim();
     if (!text) return;
 
     appendMessage(text, 'user');
