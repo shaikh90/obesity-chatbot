@@ -1,12 +1,13 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const API_KEY = "AIzaSyAvdNjYR4wVcWZ6-kDsWLVUAEyIAWaAYzs";
+
+// Force stable version v1 instead of v1beta
 const genAI = new GoogleGenerativeAI(API_KEY);
 
 const model = genAI.getGenerativeModel({ 
     model: "gemini-1.5-flash",
-    systemInstruction: "You are a professional obesity expert. Answer questions about weight loss and diet in Roman Urdu and English only. Politely decline other topics."
-});
+}, { apiVersion: 'v1' }); // <--- Ye line add karein, ye 404 khatam karegi
 
 const chatBox = document.getElementById('chat-box');
 const userInput = document.getElementById('user-input');
@@ -14,12 +15,15 @@ const sendBtn = document.getElementById('send-btn');
 
 async function getResponse(prompt) {
     try {
-        const result = await model.generateContent(prompt);
+        const result = await model.generateContent({
+            contents: [{ role: "user", parts: [{ text: prompt }] }],
+            systemInstruction: "You are a professional obesity expert. Answer in Roman Urdu and English only."
+        });
         const response = await result.response;
         return response.text();
     } catch (error) {
-        console.error("SDK Error:", error);
-        return "Connection mein masla hai. Error: " + error.message;
+        console.error("SDK Error Details:", error);
+        return "Connection fail: " + error.message;
     }
 }
 
