@@ -5,42 +5,45 @@ const userInput = document.getElementById('user-input');
 const sendBtn = document.getElementById('send-btn');
 
 // Chat History maintain karne ke liye array
-let chatHistory = [
-    {
-        role: "user",
-        parts: [{ text: `
-            System Instructions:
-            1. You are a Professional Obesity & Weight Management Consultant.
-            2. Language: Support both English and Roman Urdu. 
-            3. Context: You will be used by both general users and medical doctors.
-            4. Tone: Professional, clinical, yet encouraging.
-            5. Strict Rule: Only discuss obesity, weight loss, nutrition, and metabolic health. 
-            6. If a doctor asks in English using medical terminology, respond with professional clinical accuracy.
-            7. If a user asks in Roman Urdu, respond in a simple, easy-to-understand way.
-            8. Always include a disclaimer that AI advice is for informational purposes and not a substitute for professional medical diagnosis.` 
-        }]
-    }
-];
+let chatHistory = [];
+const systemPrompt = "You are a Professional Obesity Consultant. Respond in Roman Urdu/English. Only discuss weight loss and health.";
 
 async function getResponse(prompt) {
-    // History mein user ka message add karna
+    // History mein user ka naya sawal add karein
     chatHistory.push({ role: "user", parts: [{ text: prompt }] });
 
     try {
         const response = await fetch(API_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ contents: chatHistory })
+            body: JSON.stringify({ 
+                // System Instruction ko yahan add karein (Advanced Method)
+                system_instruction: {
+                    parts: [{ text: "You are an expert obesity consultant for doctors and patients. Speak Roman Urdu and English." }]
+                },
+                contents: chatHistory,
+                safetySettings: [
+                    { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+                    { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+                    { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+                    { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
+                ]
+            })
         });
 
         const data = await response.json();
-        const aiText = data.candidates[0].content.parts[0].text;
-
-        // History mein AI ka response add karna
-        chatHistory.push({ role: "model", parts: [{ text: aiText }] });
-        return aiText;
+        
+        if (data.candidates && data.candidates[0].content) {
+            const aiText = data.candidates[0].content.parts[0].text;
+            chatHistory.push({ role: "model", parts: [{ text: aiText }] });
+            return aiText;
+        } else {
+            // Agar safety block ho jaye toh data.promptFeedback check karein
+            console.log("Full Data:", data);
+            return "Maafi chahta hoon, main is sawal ka jawab nahi de sakta.";
+        }
     } catch (error) {
-        return "Maafi chahta hoon, kuch masla lag raha hai. Dobara koshish karein.";
+        return "Network Error. Please try again.";
     }
 }
 
