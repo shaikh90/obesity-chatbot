@@ -1,5 +1,5 @@
-const API_KEY = "AIzaSyBxft-XH4xYtCJ1WFURvXCn3sKWPsfFBjs"; 
-// Stable URL without 'beta' to avoid 404
+const API_KEY = "AIzaSyAvdNjYR4wVcWZ6-kDsWLVUAEyIAWaAYzs"; 
+// v1beta aur gemini-1.5-flash ka combination connection ke liye best hai
 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
 
 const chatBox = document.getElementById('chat-box');
@@ -9,7 +9,6 @@ const sendBtn = document.getElementById('send-btn');
 let chatHistory = [];
 
 async function getResponse(prompt) {
-    // History update
     chatHistory.push({ role: "user", parts: [{ text: prompt }] });
 
     try {
@@ -22,20 +21,21 @@ async function getResponse(prompt) {
         });
 
         const data = await response.json();
-        console.log("Response Check:", data);
+        console.log("Full Response:", data); // Is se aapko Console mein pura object dikhega
 
         if (data.candidates && data.candidates[0].content) {
             const aiText = data.candidates[0].content.parts[0].text;
             chatHistory.push({ role: "model", parts: [{ text: aiText }] });
             return aiText;
         } else {
-            return "Server se sahi jawab nahi aaya. Error: " + (data.error ? data.error.message : "Unknown");
+            return "Error: " + (data.error ? data.error.message : "Jawab nahi aaya.");
         }
     } catch (error) {
-        return "Network fail ho gaya. Internet check karein.";
+        return "Network fail ho gaya.";
     }
 }
 
+// Baki ka appendMessage aur eventListener wahi rahega jo aapne likha hai
 function appendMessage(text, sender) {
     const msgDiv = document.createElement('div');
     msgDiv.className = sender === 'user' ? 'message user-message' : 'message ai-message';
