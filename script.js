@@ -1,39 +1,28 @@
-const API_KEY = "AIzaSyAvdNjYR4wVcWZ6-kDsWLVUAEyIAWaAYzs"; 
-const API_URL = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+import { GoogleGenerativeAI } from "@google/generative-ai";
+
+const API_KEY = "AIzaSyAvdNjYR4wVcWZ6-kDsWLVUAEyIAWaAYzs";
+const genAI = new GoogleGenerativeAI(API_KEY);
+
+const model = genAI.getGenerativeModel({ 
+    model: "gemini-1.5-flash",
+    systemInstruction: "You are a professional obesity expert. Answer questions about weight loss and diet in Roman Urdu and English only. Politely decline other topics."
+});
+
 const chatBox = document.getElementById('chat-box');
 const userInput = document.getElementById('user-input');
 const sendBtn = document.getElementById('send-btn');
 
-let chatHistory = [];
-
 async function getResponse(prompt) {
-    chatHistory.push({ role: "user", parts: [{ text: prompt }] });
-
     try {
-        const response = await fetch(API_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                contents: chatHistory
-            })
-        });
-
-        const data = await response.json();
-        console.log("Full Response:", data); // Is se aapko Console mein pura object dikhega
-
-        if (data.candidates && data.candidates[0].content) {
-            const aiText = data.candidates[0].content.parts[0].text;
-            chatHistory.push({ role: "model", parts: [{ text: aiText }] });
-            return aiText;
-        } else {
-            return "Error: " + (data.error ? data.error.message : "Jawab nahi aaya.");
-        }
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        return response.text();
     } catch (error) {
-        return "Network fail ho gaya.";
+        console.error("SDK Error:", error);
+        return "Connection mein masla hai. Error: " + error.message;
     }
 }
 
-// Baki ka appendMessage aur eventListener wahi rahega jo aapne likha hai
 function appendMessage(text, sender) {
     const msgDiv = document.createElement('div');
     msgDiv.className = sender === 'user' ? 'message user-message' : 'message ai-message';

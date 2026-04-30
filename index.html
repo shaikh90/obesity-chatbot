@@ -13,7 +13,6 @@
             <p>Roman Urdu aur English mein baat karein</p>
         </div>
         <div id="chat-box" class="chat-box">
-            <!-- Messages yahan nazar ayenge -->
             <div class="message ai-message">Asalam-o-Alaikum! Main obesity expert hoon. Wazan kam karne ke bare mein kuch bhi pochein.</div>
         </div>
         <div class="input-area">
@@ -21,6 +20,17 @@
             <button id="send-btn">Bhejein</button>
         </div>
     </div>
-    <script src="script.js"></script>
+
+    <!-- 1. Pehle importmap rakhein -->
+    <script type="importmap">
+    {
+      "imports": {
+        "@google/generative-ai": "https://esm.run/@google/generative-ai"
+      }
+    }
+    </script>
+
+    <!-- 2. Uske baad apni script file load karein -->
+    <script type="module" src="script.js"></script>
 </body>
 </html>
