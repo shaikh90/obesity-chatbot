@@ -1,10 +1,13 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const API_KEY = "AIzaSyAvdNjYR4wVcWZ6-kDsWLVUAEyIAWaAYzs";
+// 1. Aapki bilkul nayi aur secure key
+const API_KEY = "AQAb8RN6L0ZLEVVnU2dKZn2PbLSHKDRpvUUenc6R5L5brQX1_2wA"; 
 const genAI = new GoogleGenerativeAI(API_KEY);
 
-// 'gemini-1.5-flash' ki jagah 'gemini-pro' use karein, ye hamesha chalta hai
-const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+// 2. Model initialization (Naye project ke liye apiVersion ki zaroorat nahi)
+const model = genAI.getGenerativeModel({ 
+    model: "gemini-1.5-flash" 
+});
 
 const chatBox = document.getElementById('chat-box');
 const userInput = document.getElementById('user-input');
@@ -12,13 +15,16 @@ const sendBtn = document.getElementById('send-btn');
 
 async function getResponse(prompt) {
     try {
-        // Obesity instruction prompt ke sath hi bhej rahe hain
-        const result = await model.generateContent(`Role: Obesity Expert. Talk in Roman Urdu and English. User Question: ${prompt}`);
+        // Expertise context seedha prompt mein bhej rahe hain taake payload simple rahe
+        const fullPrompt = `Role: Professional Obesity Expert. Answer in Roman Urdu and English. Question: ${prompt}`;
+        
+        const result = await model.generateContent(fullPrompt);
         const response = await result.response;
         return response.text();
     } catch (error) {
         console.error("Technical Error:", error);
-        return "Connection fail: " + error.message;
+        // Error message ko user-friendly rakhein
+        return "Connection mein masla hai, lekin key ab sahi hai. Error: " + error.message;
     }
 }
 
@@ -33,8 +39,10 @@ function appendMessage(text, sender) {
 sendBtn.addEventListener('click', async () => {
     const text = userInput.value.trim();
     if (!text) return;
+    
     appendMessage(text, 'user');
     userInput.value = '';
+    
     const aiResponse = await getResponse(text);
     appendMessage(aiResponse, 'ai');
 });
