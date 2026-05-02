@@ -1,7 +1,8 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 // 1. Aapki bilkul nayi aur secure key
-const API_KEY = "AQAb8RN6L0ZLEVVnU2dKZn2PbLSHKDRpvUUenc6R5L5brQX1_2wA"; 
+const API_KEY = "AQ.Ab8RN6L0ZLEVvnU2dKZn2PbLSHKDRpvUUenc6R5L5brQX1_2wA";
+
 const genAI = new GoogleGenerativeAI(API_KEY);
 
 // 2. Model initialization (Naye project ke liye apiVersion ki zaroorat nahi)
